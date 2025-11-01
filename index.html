@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Excel file viewer and SQL query tool">
+    <meta name="keywords" content="excel,viewer,xlsx,xls,sql,query,online">
+    <meta name="author" content="Excel Viewer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Viewer - Query Excel with SQL</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/select2.min.css" rel="stylesheet">
+    <link href="css/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="main-container" class="container shadow bg-white">
+    <header id="header" class="row align-items-center p-4">
+        <div class="col-auto p-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" fill="#217346" class="bi bi-file-earmark-spreadsheet" viewBox="0 0 16 16">
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V9H3V2a1 1 0 0 1 1-1h5.5zM3 12v-2h2v2zm0 1h2v2H4a1 1 0 0 1-1-1zm3 2v-2h3v2zm4 0v-2h3v1a1 1 0 0 1-1 1zm3-3h-3v-2h3zm-7 0v-2h3v2z"/>
+            </svg>
+        </div>
+
+        <div class="col">
+            <h4 class="mb-0">Excel Viewer</h4>
+            <p class="mb-0">Query Excel files with SQL - No upload, all in browser</p>
+        </div>
+
+        <a href="#" id="resizer" aria-label="Expand/Collapse" class="col-auto text-decoration-none" style="color: #217346">
+            <svg id="resizer-expand" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrows-angle-expand" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707m4.344-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707"/>
+            </svg>
+            <svg id="resizer-collapse" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrows-angle-contract collapse" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M.172 15.828a.5.5 0 0 0 .707 0l4.096-4.096V14.5a.5.5 0 1 0 1 0v-3.975a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0 0 1h2.768L.172 15.121a.5.5 0 0 0 0 .707M15.828.172a.5.5 0 0 0-.707 0l-4.096 4.096V1.5a.5.5 0 1 0-1 0v3.975a.5.5 0 0 0 .5.5H14.5a.5.5 0 0 0 0-1h-2.768L15.828.879a.5.5 0 0 0 0-.707"/>
+            </svg>
+        </a>
+    </header>
+
+    <div id="compat-error" class="alert alert-danger row rounded-0 d-none" role="alert">
+        Sorry but your browser does not support some of new HTML5 features! Try using latest version of Google Chrome or Firefox.
+    </div>
+
+    <div class="row text-center p-3 align-items-stretch" id="dropzone" onclick="dropzoneClick(this)">
+        <div class="d-flex border border-success-subtle rounded-1 align-items-center justify-content-center">
+            <div id="drop-text">
+                <b>Drop Excel file here</b> to load content or click on this box to open file dialog.<br/>
+
+                <div class="nouploadinfo small mb-3">No file will be uploaded - uses only JavaScript HTML5 FileReader.
+                    <br/>Supports .xlsx and .xls formats
+                </div>
+
+                <a id="sample-db-link" class="no-propagate small text-decoration-none"
+                   href="examples/sample.xlsx">&hellip; or download &amp; try this sample file</a>
+            </div>
+            <div id="drop-loading" class="d-flex align-items-center d-none">
+                <div class="spinner-border me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <b>Processing file...</b>
+            </div>
+        </div>
+    </div>
+
+    <div id="output-box" class="container-fluid" >
+        <div class="input-group">
+            <select id="tables" class="form-select" title="Sheet/Table"></select>
+
+            <div class="dropdown ms-2 d-none">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu1"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Export
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a class="dropdown-item" href="#" onclick="exportAllToCsv()">All sheets to CSV</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="exportSelectedTableToCsv()">Selected sheet to CSV</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="exportQueryTableToCsv()">Query result to CSV</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="d-flex mt-3 mb-3">
+            <div id="sql-editor" class="form-control form-control-lg col me-2"></div>
+            <button class="btn btn-primary col-auto" id="sql-run" type="submit" onclick="executeSql(this)">Execute</button>
+        </div>
+
+        <div class="alert alert-danger" id="error" style="display: none"></div>
+        <div class="alert alert-info" id="info" style="display: none"></div>
+
+        <div class="row pb-4">
+            <div class="overflow-x-auto">
+                <table id="data" class="table table-sm table-bordered table-hover table-striped">
+                    <thead>
+                    <tr></tr>
+                    </thead>
+                    <tbody class="table-group-divider"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="bottom-bar" class="d-flex position-sticky justify-content-center bottom-0 pb-4 d-none pe-none">
+    <div class="row bg-white border border-dark shadow p-3 rounded-2 pe-auto">
+        <button class="btn btn-outline-secondary btn-sm lh-1 col-auto" id="page-prev" type="submit" onclick="setPage(this, false)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+                <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+            </svg>
+        </button>
+        <a href="javascript:void(0)" data-bs-toggle="tooltip" class="text-decoration-none col-auto" onclick="setPage(this)" id="pager"></a>
+        <button class="btn btn-outline-secondary btn-sm lh-1 col-auto" id="page-next" type="submit" onclick="setPage(this, true)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+                <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<footer class="col text-center text-secondary py-2 my-1 small" id="footer">
+    <a href="#" class="text-decoration-none">&copy; 2025 Excel Viewer</a><br>
+    <small>| Powered by SheetJS + AlaSQL |</small>
+</footer>
+
+<input type="file" id="dropzone-dialog" style="opacity: 0;display:none" accept=".xlsx,.xls">
+
+<script src="js/jquery-3.7.1.min.js"></script>
+<script src="js/filereader.js"></script>
+<script src="js/xlsx.full.min.js"></script>
+<script src="js/alasql.min.js"></script>
+<script src="js/select2.min.js"></script>
+<script src="js/ace/ace.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/mindmup-editabletable.js"></script>
+<script src="js/jszip.min.js"></script>
+<script src="js/FileSaver.min.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

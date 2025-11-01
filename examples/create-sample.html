@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Sample Excel File</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="../js/FileSaver.min.js"></script>
+</head>
+<body>
+    <h1>Creating sample.xlsx...</h1>
+    <script>
+        // Create a sample workbook
+        var wb = XLSX.utils.book_new();
+
+        // Sheet 1: Employees
+        var employeesData = [
+            ['ID', 'Name', 'Department', 'Salary', 'HireDate', 'Active'],
+            [1, 'John Smith', 'Engineering', 85000, '2020-01-15', 'Yes'],
+            [2, 'Jane Doe', 'Marketing', 72000, '2019-03-22', 'Yes'],
+            [3, 'Bob Johnson', 'Engineering', 95000, '2018-07-10', 'Yes'],
+            [4, 'Alice Williams', 'Sales', 68000, '2021-02-01', 'Yes'],
+            [5, 'Charlie Brown', 'HR', 62000, '2020-11-30', 'No'],
+            [6, 'Diana Prince', 'Engineering', 105000, '2017-05-18', 'Yes'],
+            [7, 'Eve Anderson', 'Marketing', 78000, '2019-09-12', 'Yes'],
+            [8, 'Frank Miller', 'Sales', 71000, '2020-06-25', 'Yes'],
+            [9, 'Grace Lee', 'Engineering', 88000, '2021-01-08', 'Yes'],
+            [10, 'Henry Davis', 'HR', 65000, '2018-12-15', 'Yes']
+        ];
+        var ws1 = XLSX.utils.aoa_to_sheet(employeesData);
+        XLSX.utils.book_append_sheet(wb, ws1, 'Employees');
+
+        // Sheet 2: Departments
+        var departmentsData = [
+            ['DeptID', 'DepartmentName', 'Manager', 'Budget'],
+            [1, 'Engineering', 'Diana Prince', 500000],
+            [2, 'Marketing', 'Eve Anderson', 250000],
+            [3, 'Sales', 'Frank Miller', 300000],
+            [4, 'HR', 'Henry Davis', 150000]
+        ];
+        var ws2 = XLSX.utils.aoa_to_sheet(departmentsData);
+        XLSX.utils.book_append_sheet(wb, ws2, 'Departments');
+
+        // Sheet 3: Sales Data
+        var salesData = [
+            ['Date', 'Product', 'Quantity', 'Revenue', 'Region'],
+            ['2024-01-15', 'Product A', 100, 5000, 'North'],
+            ['2024-01-20', 'Product B', 150, 7500, 'South'],
+            ['2024-02-10', 'Product A', 200, 10000, 'East'],
+            ['2024-02-15', 'Product C', 80, 4000, 'West'],
+            ['2024-03-05', 'Product B', 120, 6000, 'North'],
+            ['2024-03-12', 'Product A', 180, 9000, 'South'],
+            ['2024-04-08', 'Product C', 95, 4750, 'East'],
+            ['2024-04-22', 'Product B', 140, 7000, 'West']
+        ];
+        var ws3 = XLSX.utils.aoa_to_sheet(salesData);
+        XLSX.utils.book_append_sheet(wb, ws3, 'Sales Data');
+
+        // Write the file
+        var wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+        var blob = new Blob([wbout], {type:'application/octet-stream'});
+        saveAs(blob, 'sample.xlsx');
+
+        document.body.innerHTML += '<p>sample.xlsx has been downloaded! You can now close this page.</p>';
+    </script>
+</body>
+</html>
