@@ -11,6 +11,15 @@ Thumbs.db
 
 # Node modules (if any)
 node_modules/
+package-lock.json
+
+# Playwright
+tests/node_modules/
+tests/package-lock.json
+tests/test-results/
+tests/playwright-report/
+tests/playwright/.cache/
+tests/specs/downloads/
 
 # Logs
 *.log
@@ -18,6 +27,11 @@ node_modules/
 # Temporary files
 *.tmp
 .cache/
+temp/
+
+# Test coverage
+coverage/
+.nyc_output/
 
 # Sample Excel files (optional - remove this line if you want to commit sample files)
 # examples/*.xlsx
