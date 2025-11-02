@@ -15,12 +15,16 @@ This project uses **Playwright** for end-to-end integration testing. The test su
 ### Test Structure
 ```
 tests/
-├── file-upload.spec.js         # File loading and parsing tests
-├── sql-queries.spec.js          # SQL query execution tests
-├── sheet-switching.spec.js      # Multi-sheet navigation tests
-├── export-functions.spec.js     # CSV/ZIP export tests
-├── ui-interactions.spec.js      # UI component tests
-└── multi-sheet-queries.spec.js  # Cross-sheet SQL queries
+├── specs/                       # Test specification files
+│   ├── file-upload.spec.js      # File loading and parsing tests
+│   ├── sql-queries.spec.js      # SQL query execution tests
+│   ├── sheet-switching.spec.js  # Multi-sheet navigation tests
+│   ├── export-functions.spec.js # CSV/ZIP export tests
+│   ├── ui-interactions.spec.js  # UI component tests
+│   └── multi-sheet-queries.spec.js # Cross-sheet SQL queries
+├── package.json                 # NPM dependencies
+├── playwright.config.js         # Playwright configuration
+└── README.md                    # Quick start guide
 ```
 
 ## Setup
@@ -32,22 +36,31 @@ tests/
 
 ### Installation
 
-1. **Install dependencies**
+**Important: All test commands must be run from the `tests` directory.**
+
+1. **Navigate to tests directory**
+   ```bash
+   cd tests
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. **Install Playwright browsers**
+3. **Install Playwright browsers**
    ```bash
    npx playwright install
    ```
 
-3. **Install system dependencies** (Linux only)
+4. **Install system dependencies** (Linux only)
    ```bash
    npx playwright install-deps
    ```
 
 ## Running Tests
+
+**All commands below assume you are in the `tests` directory:**
 
 ### Run All Tests
 ```bash
@@ -66,7 +79,7 @@ npm run test:debug
 
 ### Run Specific Test File
 ```bash
-npx playwright test tests/file-upload.spec.js
+npx playwright test specs/file-upload.spec.js
 ```
 
 ### Run Tests in Specific Browser
