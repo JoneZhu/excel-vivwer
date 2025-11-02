@@ -15,6 +15,10 @@ function setupTestDatabase() {
   // Clear existing tables
   alasql.tables = {};
 
+  // Drop tables if they exist to ensure clean state
+  try { alasql('DROP TABLE IF EXISTS Employees'); } catch(e) {}
+  try { alasql('DROP TABLE IF EXISTS Departments'); } catch(e) {}
+
   // Create Employees table
   alasql('CREATE TABLE Employees (Name STRING, Department STRING, Salary STRING, HireDate STRING)');
   employeeData.rows.forEach(row => {
@@ -31,6 +35,10 @@ function setupTestDatabase() {
 // Helper to setup Orders and Customers
 function setupOrdersDatabase() {
   alasql.tables = {};
+
+  // Drop tables if they exist to ensure clean state
+  try { alasql('DROP TABLE IF EXISTS Orders'); } catch(e) {}
+  try { alasql('DROP TABLE IF EXISTS Customers'); } catch(e) {}
 
   alasql('CREATE TABLE Orders (OrderID STRING, CustomerID STRING, Product STRING, Amount STRING)');
   ordersData.rows.forEach(row => {
@@ -107,28 +115,28 @@ describe('SQL Query Execution - Aggregate Functions', () => {
   });
 
   test('should execute COUNT(*)', () => {
-    const results = alasql('SELECT COUNT(*) as Total FROM Employees');
+    const results = alasql('SELECT COUNT(*) as TotalCount FROM Employees');
 
     expect(results).toHaveLength(1);
-    expect(results[0].Total).toBe(5);
+    expect(results[0].TotalCount).toBe(5);
   });
 
   test('should execute COUNT with WHERE', () => {
-    const results = alasql("SELECT COUNT(*) as Total FROM Employees WHERE Department = 'Engineering'");
+    const results = alasql("SELECT COUNT(*) as TotalCount FROM Employees WHERE Department = 'Engineering'");
 
-    expect(results[0].Total).toBe(2);
+    expect(results[0].TotalCount).toBe(2);
   });
 
   test('should execute GROUP BY with COUNT', () => {
-    const results = alasql('SELECT Department, COUNT(*) as Count FROM Employees GROUP BY Department');
+    const results = alasql('SELECT Department, COUNT(*) as RowCount FROM Employees GROUP BY Department');
 
     expect(results).toHaveLength(3);
 
     const engineering = results.find(r => r.Department === 'Engineering');
-    expect(engineering.Count).toBe(2);
+    expect(engineering.RowCount).toBe(2);
 
     const sales = results.find(r => r.Department === 'Sales');
-    expect(sales.Count).toBe(2);
+    expect(sales.RowCount).toBe(2);
   });
 
   test('should execute SUM with CAST', () => {
@@ -155,7 +163,7 @@ describe('SQL Query Execution - Aggregate Functions', () => {
     const results = alasql(`
       SELECT
         Department,
-        COUNT(*) as Count,
+        COUNT(*) as RowCount,
         AVG(CAST(Salary AS INT)) as AvgSalary
       FROM Employees
       GROUP BY Department
@@ -164,7 +172,7 @@ describe('SQL Query Execution - Aggregate Functions', () => {
     expect(results).toHaveLength(3);
 
     const engineering = results.find(r => r.Department === 'Engineering');
-    expect(engineering.Count).toBe(2);
+    expect(engineering.RowCount).toBe(2);
     expect(engineering.AvgSalary).toBe(90000);
   });
 });
@@ -304,7 +312,7 @@ describe('SQL Query Execution - HAVING Clause', () => {
 
   test('should execute GROUP BY with HAVING', () => {
     const results = alasql(`
-      SELECT Department, COUNT(*) as Count
+      SELECT Department, COUNT(*) as RowCount
       FROM Employees
       GROUP BY Department
       HAVING COUNT(*) >= 2
@@ -365,7 +373,10 @@ describe('SQL Query Execution - Error Handling', () => {
 describe('SQL Query Execution - NULL Handling', () => {
   beforeEach(() => {
     alasql.tables = {};
-    alasql('CREATE TABLE TestNull (ID STRING, Value STRING)');
+    // Drop table if exists to ensure clean state
+    try { alasql('DROP TABLE IF EXISTS TestNull'); } catch(e) {}
+    // Renamed 'Value' to 'DataValue' to avoid AlaSQL reserved keyword
+    alasql('CREATE TABLE TestNull (ID STRING, DataValue STRING)');
     alasql('INSERT INTO TestNull VALUES (?, ?)', ['1', 'A']);
     alasql('INSERT INTO TestNull VALUES (?, ?)', ['2', null]);
     alasql('INSERT INTO TestNull VALUES (?, ?)', ['3', 'C']);
@@ -376,14 +387,14 @@ describe('SQL Query Execution - NULL Handling', () => {
   });
 
   test('should handle IS NULL', () => {
-    const results = alasql('SELECT * FROM TestNull WHERE Value IS NULL');
+    const results = alasql('SELECT * FROM TestNull WHERE DataValue IS NULL');
 
     expect(results).toHaveLength(1);
     expect(results[0].ID).toBe('2');
   });
 
   test('should handle IS NOT NULL', () => {
-    const results = alasql('SELECT * FROM TestNull WHERE Value IS NOT NULL');
+    const results = alasql('SELECT * FROM TestNull WHERE DataValue IS NOT NULL');
 
     expect(results).toHaveLength(2);
   });
